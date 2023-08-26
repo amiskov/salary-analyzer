@@ -10,6 +10,7 @@ packages = [{include = "salary_analyzer"}]
 python = "^3.11"
 requests = "^2.31.0"
 environs = "^9.5.0"
+terminaltables = "^3.1.10"
 
 [tool.poetry.group.dev.dependencies]
 ipython = "^8.14.0"
