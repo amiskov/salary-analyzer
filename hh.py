@@ -1,6 +1,8 @@
-import requests
 from logging import info
 from statistics import mean
+
+import requests
+
 from salary import predict_rub_salary
 
 
@@ -8,19 +10,26 @@ URL = 'https://api.hh.ru/vacancies'
 
 
 def get_lang_stats(lang: str) -> dict:
+    """Возвращает статистику по языку программирования от HH."""
     vacancies_found, vacancies_processed = 0, 0
     possible_salaries = []
 
     params = {
-        'text': lang,
+        'area': '1',  # Moscow
+        'period': 30,  # days
+        'professional_role': 96,  # "Программист, разработчик"
+        'search_field': 'name',  # искать в названии вакансии
         'per_page': 50,  # 50 is the maximum
+        'text': lang,
     }
 
     page, pages = 0, 1
     while page < pages:
         params.update({'page': page})
-        resp = _fetch(params)
-        vacancies_found = resp['found']
+
+        resp_raw = requests.get(URL, params=params)
+        resp_raw.raise_for_status()
+        resp = resp_raw.json()
 
         for position in resp['items']:
             salary_from, salary_to = _get_salary_range(position)
@@ -30,6 +39,7 @@ def get_lang_stats(lang: str) -> dict:
             possible_salaries.append(possible_salary)
             vacancies_processed += 1
 
+        vacancies_found = resp['found']
         pages = resp['pages']
         info(f'{lang.capitalize()} page {page+1} of {pages}.')
         page += 1
@@ -43,24 +53,6 @@ def get_lang_stats(lang: str) -> dict:
         'vacancies_processed': vacancies_processed,
         'average_salary': avg_salary,
     }
-
-
-def _fetch(user_params: dict) -> dict:
-    """
-    Качает данные с HH API и возвращает ответ в виде словаря.
-    На вход принимается словарь параметров для GET-запроса.
-    Нумерация страниц в HH API начинаются с 0.
-    """
-    params = {
-        'area': '1',  # Moscow
-        'period': 30,  # days
-        'professional_role': 96,  # "Программист, разработчик"
-        'search_field': 'name',  # искать в названии вакансии
-    }
-    params.update(user_params)
-    resp = requests.get(URL, params=params)
-    resp.raise_for_status()
-    return resp.json()
 
 
 def _get_salary_range(position: dict) -> tuple[int | None, int | None]:

@@ -1,7 +1,8 @@
-import requests
 from statistics import mean
-import math
 from logging import info
+import math
+
+import requests
 
 from salary import predict_rub_salary
 
@@ -9,22 +10,31 @@ URL = 'https://api.superjob.ru/2.0/vacancies/'
 
 
 def get_lang_stats(lang: str,  api_key: str | None = None) -> dict:
+    """Возвращает статистику по языку программирования от SuperJob."""
     vacancies_found, vacancies_processed = 0, 0
     possible_salaries = []
-
-    params = {
-        'keyword': lang,
-        'count': 100,  # max 100 positions per page
-    }
 
     if not api_key:
         raise ValueError('Please, provide an API KEY.')
 
+    headers = {
+        'X-Api-App-Id': api_key,
+    }
+    params = {
+        'town': 4,  # "Москва"
+        'period': 30,  # дней
+        'catalogues': 48,  # "Разработка, программирование"
+        'count': 100,  # max 100 positions per page
+        'keyword': lang,
+    }
+
     page, pages = 0, 1
     while page < pages:
         params.update({'page': page})
-        resp = _fetch(params, api_key)
-        vacancies_found = resp['total']
+
+        resp_raw = requests.get(URL, params=params, headers=headers)
+        resp_raw.raise_for_status()
+        resp = resp_raw.json()
 
         for position in resp['objects']:
             salary_from, salary_to = _get_salary_range(position)
@@ -34,6 +44,7 @@ def get_lang_stats(lang: str,  api_key: str | None = None) -> dict:
             possible_salaries.append(possible_salary)
             vacancies_processed += 1
 
+        vacancies_found = resp['total']
         pages = math.ceil(vacancies_found / params['count'])
         info(f'{lang.capitalize()} page {page+1} of {pages}.')
         page += 1
@@ -47,26 +58,6 @@ def get_lang_stats(lang: str,  api_key: str | None = None) -> dict:
         'vacancies_processed': vacancies_processed,
         'average_salary': avg_salary,
     }
-
-
-def _fetch(user_params: dict, api_key: str) -> dict:
-    """
-    Качает данные с HH API и возвращает ответ в виде словаря.
-    На вход принимается словарь параметров для GET-запроса.
-    Нумерация страниц в HH API начинаются с 0.
-    """
-    headers = {
-        'X-Api-App-Id': api_key,
-    }
-    params = {
-        'town': 4,  # "Москва"
-        'period': 30,  # дней
-        'catalogues': 48,  # "Разработка, программирование"
-    }
-    params.update(user_params)
-    resp = requests.get(URL, params=params, headers=headers)
-    resp.raise_for_status()
-    return resp.json()
 
 
 def _get_salary_range(position: dict) -> tuple[int | None, int | None]:
