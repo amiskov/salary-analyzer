@@ -32,9 +32,9 @@ def get_lang_stats(lang: str,  api_key: str | None = None) -> dict:
     while page < pages:
         params.update({'page': page})
 
-        resp_raw = requests.get(URL, params=params, headers=headers)
-        resp_raw.raise_for_status()
-        resp = resp_raw.json()
+        raw_resp = requests.get(URL, params=params, headers=headers)
+        raw_resp.raise_for_status()
+        resp = raw_resp.json()
 
         for position in resp['objects']:
             salary_from, salary_to = _get_salary_range(position)

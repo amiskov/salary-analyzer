@@ -27,9 +27,9 @@ def get_lang_stats(lang: str) -> dict:
     while page < pages:
         params.update({'page': page})
 
-        resp_raw = requests.get(URL, params=params)
-        resp_raw.raise_for_status()
-        resp = resp_raw.json()
+        raw_resp = requests.get(URL, params=params)
+        raw_resp.raise_for_status()
+        resp = raw_resp.json()
 
         for position in resp['items']:
             salary_from, salary_to = _get_salary_range(position)
