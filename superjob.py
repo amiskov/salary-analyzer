@@ -9,13 +9,10 @@ from salary import predict_rub_salary
 URL = 'https://api.superjob.ru/2.0/vacancies/'
 
 
-def get_lang_stats(lang: str,  api_key: str | None = None) -> dict:
+def get_lang_stats(lang: str,  api_key: str) -> dict:
     """Возвращает статистику по языку программирования от SuperJob."""
     vacancies_found = 0
     possible_salaries = []
-
-    if not api_key:
-        raise ValueError('Please, provide an API KEY.')
 
     headers = {
         'X-Api-App-Id': api_key,
