@@ -62,8 +62,8 @@ def get_lang_stats(lang: str,  api_key: str | None = None) -> dict:
 def _get_salary_range(position: dict) -> tuple[int | None, int | None]:
     """Возвращает значения "от" и "до" из зарплаты вакансии."""
     salary_from, salary_to = None, None
-    if position['payment_from'] != 0:
+    if position['payment_from']:
         salary_from = position['payment_from']
-    if position['payment_to'] != 0:
+    if position['payment_to']:
         salary_to = position['payment_to']
     return salary_from, salary_to
