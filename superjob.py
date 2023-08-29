@@ -11,7 +11,7 @@ URL = 'https://api.superjob.ru/2.0/vacancies/'
 
 def get_lang_stats(lang: str,  api_key: str | None = None) -> dict:
     """Возвращает статистику по языку программирования от SuperJob."""
-    vacancies_found, vacancies_processed = 0, 0
+    vacancies_found = 0
     possible_salaries = []
 
     if not api_key:
@@ -42,7 +42,6 @@ def get_lang_stats(lang: str,  api_key: str | None = None) -> dict:
             if not possible_salary:
                 continue  # skip positions with no salary
             possible_salaries.append(possible_salary)
-            vacancies_processed += 1
 
         vacancies_found = resp['total']
         pages = math.ceil(vacancies_found / params['count'])
@@ -55,7 +54,7 @@ def get_lang_stats(lang: str,  api_key: str | None = None) -> dict:
 
     return {
         'vacancies_found': vacancies_found,
-        'vacancies_processed': vacancies_processed,
+        'vacancies_processed': len(possible_salaries),
         'average_salary': avg_salary,
     }
 

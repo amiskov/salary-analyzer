@@ -11,7 +11,7 @@ URL = 'https://api.hh.ru/vacancies'
 
 def get_lang_stats(lang: str) -> dict:
     """Возвращает статистику по языку программирования от HH."""
-    vacancies_found, vacancies_processed = 0, 0
+    vacancies_found = 0
     possible_salaries = []
 
     params = {
@@ -37,7 +37,6 @@ def get_lang_stats(lang: str) -> dict:
             if not possible_salary:
                 continue  # skip positions with no salary
             possible_salaries.append(possible_salary)
-            vacancies_processed += 1
 
         vacancies_found = resp['found']
         pages = resp['pages']
@@ -50,7 +49,7 @@ def get_lang_stats(lang: str) -> dict:
 
     return {
         'vacancies_found': vacancies_found,
-        'vacancies_processed': vacancies_processed,
+        'vacancies_processed': len(possible_salaries),
         'average_salary': avg_salary,
     }
 
