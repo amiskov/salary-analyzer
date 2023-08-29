@@ -19,7 +19,7 @@ def main():
     env.read_env()
     logging.basicConfig(level=logging.INFO)
 
-    SJ_SECRET_KEY = env('SUPERJOB_SECRET_KEY')
+    sj_secret_key = env('SUPERJOB_SECRET_KEY')
 
     # HeadHunter Stats
     langs_stats = get_service_stats(hh.get_lang_stats, LANGS)
@@ -27,7 +27,7 @@ def main():
     print(table.table)
 
     # SuperJob Stats
-    sj_stats_getter = partial(superjob.get_lang_stats, api_key=SJ_SECRET_KEY)
+    sj_stats_getter = partial(superjob.get_lang_stats, api_key=sj_secret_key)
     langs_stats = get_service_stats(sj_stats_getter, LANGS)
     table = create_table_from_stats('SuperJob Moscow', langs_stats)
     print(table.table)
